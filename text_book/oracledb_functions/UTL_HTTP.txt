@@ -9,16 +9,24 @@ DECLARE
    V_URI           VARCHAR2 (200);
 BEGIN
    V_URI := 'https://localhost';
+   
    V_REQ_CONTEXT :=
       UTL_HTTP.CREATE_REQUEST_CONTEXT (
-         WALLET_PATH            => 'file:C:\wallet',
-         WALLET_PASSWORD        => 'system11',
+         WALLET_PATH            => 'file:C:\my_wallet',
+         WALLET_PASSWORD        => null,
          ENABLE_COOKIES         => FALSE);
 
    V_REQ :=
       UTL_HTTP.BEGIN_REQUEST (URL               => V_URI,
                               METHOD            => 'GET',
                               REQUEST_CONTEXT   => V_REQ_CONTEXT);
+							  
+							  
+--	UTL_HTTP.SET_WALLET('file:C:\my_wallet', null);
+--	V_REQ :=
+--      UTL_HTTP.BEGIN_REQUEST (URL               => V_URI,
+--                              METHOD            => 'GET');
+							  
    UTL_HTTP.SET_HEADER (V_REQ, 'User-agent', 'mozilla/4.0');
    UTL_HTTP.SET_HEADER (V_REQ, 'Accept', 'application/json');
    UTL_HTTP.SET_HEADER (V_REQ, 'Accept-Charset', 'utf-8');
@@ -55,6 +63,7 @@ DECLARE
    V_URI           VARCHAR2 (200);
 BEGIN
    V_URI := 'http://localhost';
+   
    V_REQ :=
       UTL_HTTP.BEGIN_REQUEST (URL               => V_URI,
                               METHOD            => 'GET');
@@ -95,17 +104,24 @@ DECLARE
    V_URI           VARCHAR2 (200);
 BEGIN
    V_URI := 'https://localhost';
-   V_SENT_DATA := '{"id":1, "name":"احمد ابراهيم"}';
+   
+   V_SENT_DATA := '{"id":1, "name":"myname"}';
    V_CONTENT_LENGTH := LENGTHB (V_SENT_DATA);
    V_REQ_CONTEXT :=
       UTL_HTTP.CREATE_REQUEST_CONTEXT (
-         WALLET_PATH       => 'file:C:\wallet',
-         WALLET_PASSWORD   => 'system11',
+         WALLET_PATH       => 'file:C:\my_wallet',
+         WALLET_PASSWORD   => null,
          ENABLE_COOKIES    => FALSE);
    V_REQ :=
       UTL_HTTP.BEGIN_REQUEST (URL               => V_URI,
                               METHOD            => 'POST',
                               REQUEST_CONTEXT   => V_REQ_CONTEXT);
+							  
+--	UTL_HTTP.SET_WALLET('file:C:\my_wallet', null);
+--	V_REQ :=
+--      UTL_HTTP.BEGIN_REQUEST (URL               => V_URI,
+--                              METHOD            => 'POST');
+
    UTL_HTTP.SET_HEADER (V_REQ, 'User-agent', 'mozilla/4.0');
    UTL_HTTP.SET_HEADER (V_REQ,
                         'Content-type',
@@ -147,7 +163,8 @@ DECLARE
    V_URI           VARCHAR2 (200);
 BEGIN
    V_URI := 'http://localhost';
-   V_SENT_DATA := '{"id":1, "name":"احمد ابراهيم"}';
+   
+   V_SENT_DATA := '{"id":1, "name":"myname"}';
    V_CONTENT_LENGTH := LENGTHB (V_SENT_DATA);
    V_REQ :=
       UTL_HTTP.BEGIN_REQUEST (URL               => V_URI,
