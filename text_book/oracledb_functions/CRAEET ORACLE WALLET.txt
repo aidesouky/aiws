@@ -2,7 +2,6 @@
 # orapki wallet create -wallet <wallet_path> -pwd <password>
 
 -- To create an auto-login wallet to use without password
-
 # orapki wallet create -wallet <wallet_path> -auto_login -pwd <password>
 # orapki wallet create -wallet <wallet_path> -auto_login_local -pwd <password>
 # orapki wallet create -wallet <wallet_path> -auto_login_only
