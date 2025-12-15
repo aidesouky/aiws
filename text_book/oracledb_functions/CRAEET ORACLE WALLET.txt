@@ -2,12 +2,39 @@
 # orapki wallet create -wallet <wallet_path> -pwd <password>
 
 -- To create an auto-login wallet to use without password
+<<<<<<< HEAD
 # orapki wallet create -wallet <wallet_path> -auto_login -pwd <password>
 # orapki wallet create -wallet <wallet_path> -auto_login_local -pwd <password>
 # orapki wallet create -wallet <wallet_path> -auto_login_only
 
 -- To change the wallet password
 # orapki wallet change_pwd -wallet <wallet_path> -oldpwd <password>  -newpwd <new_password>
+=======
+# orapki wallet create -wallet C:\ora_wallet -auto_login -pwd system11
+# orapki wallet create -wallet C:\ora_wallet -auto_login_local -pwd system11
+# orapki wallet create -wallet C:\ora_wallet -auto_login_only
+
+-- To view an Oracle wallet
+# orapki wallet display -wallet C:\ora_wallet -pwd system11
+
+-- To change the wallet password
+# orapki wallet change_pwd -wallet C:\ora_wallet -oldpwd system11  -newpwd system12
+
+-- To change the wallet algorithm from 3DES to AES256
+# orapki wallet convert -wallet C:\ora_wallet -compat_v12 -pwd system11 
+
+-- To add a certificate request to an Oracle wallet
+# orapki wallet add -wallet C:\ora_wallet -dn user_dn -keySize [512|1024|2048] -pwd system11
+
+-- To add a trusted certificate to an Oracle wallet
+# orapki wallet add -wallet C:\ora_wallet -trusted_cert -cert certificate.crt -pwd system11
+
+-- To add a user certificate to an Oracle wallet
+# orapki wallet add -wallet C:\ora_wallet -user_cert -cert certificate.crt -pwd system11
+
+-- To add a root certificate to an Oracle wallet
+# orapki wallet add -wallet C:\ora_wallet -dn <certificate_dn> -keySize [512|1024|2048] -self_signed -validity <number_of_days> -pwd system11
+>>>>>>> cc060c204a088007475b8dbd1622d60eaf263b2e
 
 -- To verify the credential details
 # orapki wallet p11_verify -wallet <wallet_path> -pwd <password>
@@ -35,6 +62,7 @@ orapki wallet remove -wallet <wallet_path> -trusted_cert -alias <alias_name> -pw
 orapki wallet remove -wallet <wallet_path> -user_cert -alias <alias_name> -pwd <password>
 
 -- To export a certificate from an Oracle wallet
+<<<<<<< HEAD
 # orapki wallet export -wallet <wallet_path> -dn <certificate_dn> -cert <certificate>
 
 -- To export a certificate request from an Oracle wallet
@@ -42,3 +70,9 @@ orapki wallet remove -wallet <wallet_path> -user_cert -alias <alias_name> -pwd <
 
 -- To change the wallet algorithm from 3DES to AES256
 # orapki wallet convert -wallet <wallet_path> -pwd <password> -compat_v12
+=======
+# orapki wallet export -wallet C:\ora_wallet -dn <certificate_dn> -cert certificate.crt -pwd system11
+
+-- To export a certificate request from an Oracle wallet
+# orapki wallet export -wallet C:\ora_wallet -dn <certificate_request_dn> -request certificate_request.csr -pwd system11
+>>>>>>> cc060c204a088007475b8dbd1622d60eaf263b2e

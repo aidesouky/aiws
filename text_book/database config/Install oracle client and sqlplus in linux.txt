@@ -1,0 +1,35 @@
+##1 Download the Basic Package
+# wget https://download.oracle.com/otn_software/linux/instantclient/2119000/instantclient-basic-linux.x64-21.19.0.0.0dbru.zip
+
+##2 Download the SQL*Plus Package
+# wget https://download.oracle.com/otn_software/linux/instantclient/2119000/instantclient-sqlplus-linux.x64-21.19.0.0.0dbru.zip 
+
+##3 Make a new directory for the instant client.
+# sudo mkdir -p /opt/oracle
+
+##4 Unzip the Basic Package in the client directory.
+# sudo unzip -d /opt/oracle instantclient-basic-linux.x64-21.19.0.0.0dbru.zip
+
+##5 Unzip the SQL *Plus Package in the client directory.
+# sudo unzip -d /opt/oracle instantclient-sqlplus-linux.x64-21.19.0.0.0dbru.zip
+
+##6 Set the LD_LIBRARY_PATH  in your ~/.bashrc source file.
+# export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_19:$LD_LIBRARY_PATH
+
+##7 Set the PATH env vars in your ~/.bashrc
+# export PATH=$LD_LIBRARY_PATH:$PATH
+
+##8 Source your ~/.bashrc file
+# source ~/.bashrc
+
+##9 Install libaio library
+# sudo apt install libaio1t64
+
+##10 Create link to libaio library
+#sudo ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
+
+##11 Update links
+# sudo ldconfig
+
+##12 connect database using sqlplus
+# sqlplus sys/pass@host_name:port_number/service_name as sysdba
