@@ -2,14 +2,14 @@
 # orapki wallet create -wallet <wallet_path> -pwd <password>
 
 -- To create an auto-login wallet to use without password
-<<<<<<< HEAD
+
 # orapki wallet create -wallet <wallet_path> -auto_login -pwd <password>
 # orapki wallet create -wallet <wallet_path> -auto_login_local -pwd <password>
 # orapki wallet create -wallet <wallet_path> -auto_login_only
 
 -- To change the wallet password
 # orapki wallet change_pwd -wallet <wallet_path> -oldpwd <password>  -newpwd <new_password>
-=======
+
 # orapki wallet create -wallet C:\ora_wallet -auto_login -pwd system11
 # orapki wallet create -wallet C:\ora_wallet -auto_login_local -pwd system11
 # orapki wallet create -wallet C:\ora_wallet -auto_login_only
