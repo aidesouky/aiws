@@ -1,0 +1,100 @@
+create or replace NONEDITIONABLE PROCEDURE GET_REPORT (
+ ORG_NAME VARCHAR2
+) AS
+ V_REQ            UTL_HTTP.REQ;
+ V_RESP           UTL_HTTP.RESP;
+ V_REQ_CONTEXT    UTL_HTTP.REQUEST_CONTEXT_KEY;
+ V_DATA           VARCHAR2(32767);
+ V_SENT_DATA      VARCHAR2(32767);
+ V_CONTENT_LENGTH NUMBER;
+ V_CONTENT_TYPE   VARCHAR2(100);
+ V_URI            VARCHAR2(300);
+ V_LOB            CLOB;
+ V_LOOP           NUMBER;
+ V_BASE64         CLOB;
+ V_XML            CLOB;
+ V_ERROR          VARCHAR2(4000);
+BEGIN
+ V_URI := '<fusion_server_url>/xmlpserver/services/ExternalReportWSSService'
+ ;
+ V_SENT_DATA := '<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope" 
+ xmlns:tns="http://xmlns.oracle.com/oxp/service/PublicReportService">
+  <env:Body>
+    <tns:runReport>
+      <tns:reportRequest>
+        <tns:reportAbsolutePath>/Custom/Invoice/OrganizationRpt.xdo</tns:reportAbsolutePath>
+        <tns:sizeOfDataChunkDownload>-1</tns:sizeOfDataChunkDownload>
+        <tns:attributeFormat>xml</tns:attributeFormat>
+        <tns:parameterNameValues>
+          <tns:item>
+            <tns:name>P_ORG_NAME</tns:name>
+            <tns:values>
+              <tns:item>'
+                || ORG_NAME
+                || '</tns:item>
+            </tns:values>
+          </tns:item>
+        </tns:parameterNameValues>
+      </tns:reportRequest>
+    </tns:runReport>
+  </env:Body>
+</env:Envelope>';
+ V_CONTENT_LENGTH := LENGTHB(V_SENT_DATA);
+ V_REQ_CONTEXT := UTL_HTTP.CREATE_REQUEST_CONTEXT(WALLET_PATH => 'file:C:\wallet\ora_wallet'
+ , WALLET_PASSWORD => NULL, ENABLE_COOKIES => FALSE);
+ V_REQ := UTL_HTTP.BEGIN_REQUEST(URL => V_URI, METHOD => 'POST', REQUEST_CONTEXT => V_REQ_CONTEXT
+ );
+--   UTL_HTTP.SET_HEADER (V_REQ,'Authorization', 'Basic <AUTH>');
+ UTL_HTTP.SET_HEADER(V_REQ, 'Authorization', 'Basic '
+                                             || UTL_RAW.CAST_TO_VARCHAR2
+                                             (UTL_ENCODE.BASE64_ENCODE
+                                             (UTL_RAW.CAST_TO_RAW('<USER>:<PASS>'
+                                             ))));
+-- UTL_HTTP.SET_HEADER(V_REQ, 'User-agent', 'mozilla/4.0');
+ UTL_HTTP.SET_HEADER(V_REQ, 'Content-type', 'application/soap+xml; charset=UTF-8'
+ );
+ UTL_HTTP.SET_HEADER(V_REQ, 'Accept-Charset', 'utf-8');
+ UTL_HTTP.SET_HEADER(V_REQ, 'Content-Length', V_CONTENT_LENGTH);
+ UTL_HTTP.SET_BODY_CHARSET(V_REQ, 'utf-8');
+ UTL_HTTP.WRITE_TEXT(V_REQ, V_SENT_DATA);
+ V_RESP := UTL_HTTP.GET_RESPONSE(V_REQ);
+ BEGIN
+  UTL_HTTP.GET_HEADER_BY_NAME(V_RESP, 'Content-Type', V_CONTENT_TYPE)
+  ;
+  UTL_HTTP.GET_HEADER_BY_NAME(V_RESP, 'Content-Length', V_CONTENT_LENGTH
+  );
+ EXCEPTION
+  WHEN OTHERS THEN
+   NULL;
+ END;
+ DBMS_LOB.CREATETEMPORARY(V_LOB, TRUE);
+ V_LOOP := CEIL(V_CONTENT_LENGTH / 32767);
+ FOR I IN 1..V_LOOP LOOP
+  UTL_HTTP.READ_TEXT(V_RESP, V_DATA, 32767);
+  DBMS_LOB.WRITEAPPEND(V_LOB, LENGTH(V_DATA), V_DATA);
+ END LOOP;
+ UTL_HTTP.END_RESPONSE(V_RESP);
+ UTL_HTTP.DESTROY_REQUEST_CONTEXT(V_REQ_CONTEXT);
+ V_XML := GETREPORTDATA(V_LOB);
+ INSERT_ORGANIZATIONS(V_XML);
+EXCEPTION
+ WHEN UTL_HTTP.END_OF_BODY THEN
+  BEGIN
+   UTL_HTTP.END_RESPONSE(V_RESP);
+   UTL_HTTP.DESTROY_REQUEST_CONTEXT(V_REQ_CONTEXT);
+  EXCEPTION
+   WHEN OTHERS THEN
+    NULL;
+  END;
+ WHEN OTHERS THEN
+  V_ERROR := SQLERRM;
+  INSERT INTO T_RESPONSE ( RESPONSE ) VALUES ( V_ERROR );
+  COMMIT;
+  BEGIN
+   UTL_HTTP.END_RESPONSE(V_RESP);
+   UTL_HTTP.DESTROY_REQUEST_CONTEXT(V_REQ_CONTEXT);
+  EXCEPTION
+   WHEN OTHERS THEN
+    NULL;
+  END;
+END;

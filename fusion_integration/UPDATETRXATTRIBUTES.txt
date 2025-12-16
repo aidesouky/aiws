@@ -1,0 +1,90 @@
+create or replace NONEDITIONABLE PROCEDURE UPDATETRXATTRIBUTES(TRX_ID NUMBER,TRX_NUMBER VARCHAR2,JSON_ATTR_VALUE VARCHAR2)
+AS
+ V_REQ            UTL_HTTP.REQ;
+ V_RESP           UTL_HTTP.RESP;
+ V_REQ_CONTEXT    UTL_HTTP.REQUEST_CONTEXT_KEY;
+ V_DATA           VARCHAR2(32000);
+ V_SENT_DATA      VARCHAR2(32000);
+ V_CONTENT_LENGTH NUMBER;
+ V_CONTENT_TYPE   VARCHAR2(100);
+ V_URI            VARCHAR2(200);
+ V_ERROR          VARCHAR2(4000);
+BEGIN
+ V_URI := '<FUSION_SERVER_URL>/fscmService/ErpObjectDFFUpdateService';
+ V_SENT_DATA := '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:typ="http://xmlns.oracle.com/apps/financials/commonModules/shared/model/erpIntegrationService/types/" 
+                  xmlns:erp="http://xmlns.oracle.com/apps/financials/commonModules/shared/model/erpIntegrationService/">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <typ:updateDffEntityDetails>
+            <typ:operationMode>SINGLE</typ:operationMode>
+            <typ:object>
+                <erp:EntityName>Receivables Invoice</erp:EntityName>
+                <erp:ContextValue>#NULL</erp:ContextValue>
+                <erp:UserKeyA>'||TRX_NUMBER||'</erp:UserKeyA>
+                <erp:UserKeyB></erp:UserKeyB>
+                <erp:UserKeyC></erp:UserKeyC>
+                <erp:UserKeyD>'||TRX_ID||'</erp:UserKeyD>
+                <erp:UserKeyE></erp:UserKeyE>
+                <erp:UserKeyF></erp:UserKeyF>
+                <erp:UserKeyG></erp:UserKeyG>
+                <erp:UserKeyH></erp:UserKeyH>
+                <erp:DFFAttributes>'||JSON_ATTR_VALUE||'</erp:DFFAttributes>
+            </typ:object>
+            <typ:notificationCode/>
+        </typ:updateDffEntityDetails>
+    </soapenv:Body>
+</soapenv:Envelope>';
+ V_CONTENT_LENGTH := LENGTHB(V_SENT_DATA);
+ V_REQ_CONTEXT := UTL_HTTP.CREATE_REQUEST_CONTEXT(WALLET_PATH => 'file:C:\wallet\ora_wallet'
+ , WALLET_PASSWORD => NULL, ENABLE_COOKIES => FALSE);
+ V_REQ := UTL_HTTP.BEGIN_REQUEST(URL => V_URI, METHOD => 'POST', REQUEST_CONTEXT => V_REQ_CONTEXT
+ );
+--   UTL_HTTP.SET_HEADER (V_REQ,'Authorization', 'Basic <AUTH>');
+ UTL_HTTP.SET_HEADER(V_REQ, 'Authorization', 'Basic '
+                                             || UTL_RAW.CAST_TO_VARCHAR2
+                                             (UTL_ENCODE.BASE64_ENCODE
+                                             (UTL_RAW.CAST_TO_RAW('USER:PASS'
+                                             ))));
+ UTL_HTTP.SET_HEADER(V_REQ, 'User-agent', 'mozilla/4.0');
+ UTL_HTTP.SET_HEADER(V_REQ, 'Content-type', 'text/xml');
+ UTL_HTTP.SET_HEADER(V_REQ, 'Accept-Charset', 'utf-8');
+ UTL_HTTP.SET_HEADER(V_REQ, 'Content-Length', V_CONTENT_LENGTH);
+ UTL_HTTP.SET_BODY_CHARSET(V_REQ, 'utf-8');
+ UTL_HTTP.WRITE_TEXT(V_REQ, V_SENT_DATA);
+ V_RESP := UTL_HTTP.GET_RESPONSE(V_REQ);
+ UTL_HTTP.GET_HEADER_BY_NAME(V_RESP, 'Content-Type', V_CONTENT_TYPE);
+ BEGIN
+  UTL_HTTP.GET_HEADER_BY_NAME(V_RESP, 'Content-Length', V_CONTENT_LENGTH
+  );
+ EXCEPTION
+  WHEN OTHERS THEN
+   NULL;
+ END;
+ UTL_HTTP.READ_TEXT(V_RESP, V_DATA);
+ DBMS_OUTPUT.PUT_LINE('DATATYPE: ' || V_CONTENT_TYPE);
+ DBMS_OUTPUT.PUT_LINE('DATALENGTH: ' || V_CONTENT_LENGTH);
+ DBMS_OUTPUT.PUT_LINE('DATA: ' || V_DATA);
+ UTL_HTTP.END_RESPONSE(V_RESP);
+ UTL_HTTP.DESTROY_REQUEST_CONTEXT(V_REQ_CONTEXT);
+EXCEPTION
+WHEN UTL_HTTP.END_OF_BODY THEN
+  BEGIN
+   UTL_HTTP.END_RESPONSE(V_RESP);
+   UTL_HTTP.DESTROY_REQUEST_CONTEXT(V_REQ_CONTEXT);
+  EXCEPTION
+   WHEN OTHERS THEN
+    NULL;
+  END;
+ WHEN OTHERS THEN
+  V_ERROR := SQLERRM;
+  INSERT INTO T_RESPONSE ( RESPONSE ) VALUES ( V_ERROR );
+  COMMIT;
+  BEGIN
+   UTL_HTTP.END_RESPONSE(V_RESP);
+   UTL_HTTP.DESTROY_REQUEST_CONTEXT(V_REQ_CONTEXT);
+  EXCEPTION
+   WHEN OTHERS THEN
+    NULL;
+  END;
+END;
