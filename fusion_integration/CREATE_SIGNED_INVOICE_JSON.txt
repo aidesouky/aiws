@@ -1,0 +1,271 @@
+CREATE OR REPLACE PROCEDURE CREATE_SIGNED_INVOICE_JSON (
+ P_ORG_CODE     VARCHAR2,
+ P_RETURN_VALUE OUT VARCHAR2
+) AS
+ V_JSON_OUTPUT CLOB;
+ V_SQL_ERROR   VARCHAR2(4000);
+ V_ERRORS      NUMBER := 0;
+ V_TASKS       NUMBER := 0;
+BEGIN
+ FOR Z IN (
+  SELECT
+   H.HEADER_ID,
+   H.ORG_CODE,
+   A.AGENT_CODE
+  FROM
+   DOCUMENT_HEADERS H,
+   SYSTEM_SETTINGS  S,
+   AGENTS           A
+  WHERE
+    H.ORG_CODE = S.ORG_CODE
+   AND H.ORG_CODE = A.ORG_CODE
+   AND H.SIGNED = 'N'
+   AND S.SERVICE_TYPE = 'A'
+   AND A.AGENT_STATUS = 'A'
+   AND H.ORG_CODE = P_ORG_CODE
+ ) LOOP
+  BEGIN
+   SELECT
+    JSON_OBJECT(
+     'issuer' VALUE
+      JSON_OBJECT(
+       'address' VALUE
+        JSON_OBJECT(
+         'branchID' VALUE B.BRANCH_CODE,
+                    'country' VALUE B.COUNTRY,
+                    'governate' VALUE B.GOVERNATE,
+                    'regionCity' VALUE B.REGIONCITY,
+                    'street' VALUE B.STREET,
+                    'buildingNumber' VALUE B.BUILDING_NUMBER,
+                    'postalCode' VALUE NVL(B.POSTAL_CODE, ''),
+                    'floor' VALUE NVL(B.FLOOR, ''),
+                    'room' VALUE NVL(B.ROOM, ''),
+                    'landmark' VALUE NVL(B.LANDMARK, ''),
+                    'additionalInformation' VALUE NVL(B.ADDITIONAL_INFORMATION
+                    , '')
+        ),
+                  'type' VALUE O.ORG_TYPE,
+                  'id' VALUE O.ORG_RIN,
+                  'name' VALUE O.ORG_NAME
+      ),
+                'receiver' VALUE
+      JSON_OBJECT(
+       'address' VALUE
+        JSON_OBJECT(
+         'country' VALUE C.COUNTRY,
+                    'governate' VALUE C.GOVERNATE,
+                    'regionCity' VALUE C.REGIONCITY,
+                    'street' VALUE C.STREET,
+                    'buildingNumber' VALUE C.BUILDING_NUMBER,
+                    'postalCode' VALUE NVL(C.POSTAL_CODE, ''),
+                    'floor' VALUE NVL(C.FLOOR, ''),
+                    'room' VALUE NVL(C.ROOM, ''),
+                    'landmark' VALUE NVL(C.LANDMARK, ''),
+                    'additionalInformation' VALUE NVL(C.ADDITIONAL_INFORMATION
+                    , '')
+        ),
+                  'type' VALUE C.CUSTOMER_TYPE,
+                  'id' VALUE C.CUSTOMER_RIN,
+                  'name' VALUE C.CUSTOMER_NAME
+      ),
+                'documentType' VALUE H.DOCUMENT_TYPE,
+                'documentTypeVersion' VALUE H.DOCUMENT_TYPE_VERSION,
+                'dateTimeIssued' VALUE TO_CHAR(H.DATETIME_ISSUED, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'
+                ),
+                'taxpayerActivityCode' VALUE B.ACTIVITY_CODE,
+                'internalID' VALUE H.INTERNAL_ID,
+                'purchaseOrderReference' VALUE NVL(H.PURCHASE_ORDER_REFERENCE
+                , ''),
+                'purchaseOrderDescription' VALUE NVL(H.PURCHASE_ORDER_DESCRIPTION
+                , ''),
+                'salesOrderReference' VALUE NVL(H.SALES_ORDER_REFERENCE
+                , ''),
+                'salesOrderDescription' VALUE NVL(H.SALES_ORDER_DESCRIPTION
+                , ''),
+                'proformaInvoiceNumber' VALUE NVL(H.PROFORMA_INVOICE_NUMBER
+                , ''),
+                'payment' VALUE
+      JSON_OBJECT(
+       'bankName' VALUE NVL(H.BANK_NAME, ''),
+                  'bankAddress' VALUE NVL(H.BANK_ADDRESS, ''),
+                  'bankAccountNo' VALUE NVL(H.BANK_ACCOUNT_NO, ''),
+                  'bankAccountIBAN' VALUE NVL(H.BANK_ACCOUNT_IBAN, ''
+                  ),
+                  'swiftCode' VALUE NVL(H.SWIFT_CODE, ''),
+                  'terms' VALUE NVL(H.PAYMENT_TERMS, '')
+      ),
+                'delivery' VALUE
+      JSON_OBJECT(
+       'approach' VALUE NVL(H.APPROACH, ''),
+                  'packaging' VALUE NVL(H.PACKAGING, ''),
+                  'dateValidity' VALUE TO_CHAR(NVL(H.DATEVALIDITY, ''
+                  ),
+                                               'YYYY-MM-DD"T"HH24:MI:SS"Z"'
+                                               ),
+                  'exportPort' VALUE NVL(H.EXPORT_PORT, ''),
+                  'countryOfOrigin' VALUE NVL(H.COUNTRY_OF_ORIGIN, ''
+                  ),
+                  'grossWeight' VALUE NVL(H.GROSS_WEIGHT, 0),
+                  'netWeight' VALUE NVL(H.NET_WEIGHT, 0),
+                  'terms' VALUE NVL(H.DELIVERY_TERMS, '')
+      ),
+                'invoiceLines' VALUE(
+      SELECT
+       JSON_ARRAYAGG(
+        JSON_OBJECT(
+         'description' VALUE L.DESCRIPTION,
+                    'itemType' VALUE L.ITEM_TYPE,
+                    'itemCode' VALUE L.ITEM_CODE,
+                    'unitType' VALUE L.UNIT_TYPE,
+                    'quantity' VALUE L.QUANTITY,
+                    'internalCode' VALUE L.INTERNAL_CODE,
+                    'salesTotal' VALUE L.SALES_TOTAL,
+                    'total' VALUE L.TOTAL,
+                    'valueDifference' VALUE L.VALUE_DIFFERENCE,
+                    'totalTaxableFees' VALUE L.TOTAL_TAXABLE_FEES,
+                    'netTotal' VALUE L.NET_TOTAL,
+                    'itemsDiscount' VALUE L.ITEMS_DISCOUNT,
+                    'unitValue' VALUE
+          JSON_OBJECT(
+           'currencySold' VALUE L.CURRENCY_SOLD,
+           'amountEGP' VALUE L.AMOUNT_EGP,
+           'amountSold' VALUE L.AMOUNT_SOLD,
+                      'currencyExchangeRate' VALUE L.CURRENCY_EXCHANGE_RATE
+          ),
+                    'discount' VALUE
+          JSON_OBJECT(
+           'rate' VALUE L.DISCOUNT_RATE,
+           'amount' VALUE L.DISCOUNT_AMOUNT
+          ),
+                    'taxableItems' VALUE(
+          SELECT
+           JSON_ARRAYAGG(
+            JSON_OBJECT(
+             'taxType' VALUE T.TAX_TYPE,
+             'amount' VALUE T.TAX_AMOUNT,
+             'subType' VALUE T.TAX_SUBTYPE,
+                        'rate' VALUE T.TAX_RATE
+            )
+           )
+          FROM
+           DOCUMENT_LINE_TAXS T
+          WHERE
+           T.LINE_ID = L.LINE_ID
+         )
+        )
+       )
+      FROM
+       DOCUMENT_LINES L
+      WHERE
+       L.HEADER_ID = H.HEADER_ID
+     ),
+                'totalDiscountAmount' VALUE H.TOTAL_DISCOUNT_AMOUNT,
+                'totalSalesAmount' VALUE H.TOTAL_SALES_AMOUNT,
+                'netAmount' VALUE H.NET_AMOUNT,
+                'taxTotals' VALUE(
+      SELECT
+       JSON_ARRAYAGG(
+        JSON_OBJECT(
+         'taxType' VALUE TAX_TYPE,
+         'amount' VALUE TAX_AMOUNT
+        )
+       )
+      FROM
+       (
+        SELECT
+         TAX_TYPE,
+         SUM(TAX_AMOUNT) TAX_AMOUNT
+        FROM
+         DOCUMENT_LINE_TAXS T,
+         DOCUMENT_LINES     L
+        WHERE
+          T.LINE_ID = L.LINE_ID
+         AND L.HEADER_ID = H.HEADER_ID
+        GROUP BY
+         TAX_TYPE
+       )
+     ),
+                'totalAmount' VALUE H.TOTAL_AMOUNT,
+                'extraDiscountAmount' VALUE H.EXTRA_DISCOUNT_AMOUNT,
+                'totalItemsDiscountAmount' VALUE H.TOTAL_ITEMS_DISCOUNT_AMOUNT
+                ,
+                'signatures' VALUE(
+      SELECT
+       JSON_ARRAYAGG(
+        JSON_OBJECT(
+         'signatureType' VALUE S.SIGNATURE_TYPE,
+         'value' VALUE S.SIGNATURE_VALUE
+        )
+       )
+      FROM
+       INVOICE_SIGNATURES S
+      WHERE
+       S.HEADER_ID = H.HEADER_ID
+     )
+    )
+   INTO V_JSON_OUTPUT
+   FROM
+    DOCUMENT_HEADERS H,
+    CUSTOMERS        C,
+    ORGANIZATIONS    O,
+    BRANCHES         B
+   WHERE
+     H.CUSTOMER_CODE = C.CUSTOMER_CODE
+    AND H.ORG_CODE = O.ORG_CODE
+    AND H.ORG_CODE = B.ORG_CODE
+    AND H.BRANCH_CODE = B.BRANCH_CODE
+    AND H.HEADER_ID = Z.HEADER_ID;
+   V_JSON_OUTPUT := REPLACE(V_JSON_OUTPUT, 'null', '""');
+   INSERT INTO AGENT_TASKS (
+    ENTITY_ID,
+    ENTITY_TYPE,
+    ORG_CODE,
+    AGENT_CODE,
+    TASK_TYPE,
+    TASK_DATE,
+    PAYLOAD,
+    CREATED_BY,
+    CREATED_AT,
+    UPDATED_BY,
+    UPDATED_AT
+   ) VALUES (
+    Z.HEADER_ID,
+    'INVOICE',
+    Z.ORG_CODE,
+    Z.AGENT_CODE,
+    'SIGN',
+    SYSDATE,
+    V_JSON_OUTPUT,
+    'SYSTEM',
+    SYSDATE,
+    'SYSTEM',
+    SYSDATE
+   );
+   UPDATE DOCUMENT_HEADERS
+   SET
+    SIGNED = 'I'
+   WHERE
+    HEADER_ID = Z.HEADER_ID;
+   V_TASKS := V_TASKS + 1;
+   COMMIT;
+  EXCEPTION
+   WHEN OTHERS THEN
+    V_SQL_ERROR := SQLERRM;
+    INSERT INTO AGENT_TASKS (
+     ENTITY_ID,
+     RESPONSE
+    ) VALUES (
+     Z.HEADER_ID,
+     V_SQL_ERROR
+    );
+    COMMIT;
+    V_ERRORS := V_ERRORS + 1;
+  END;
+ END LOOP;
+ P_RETURN_VALUE := 'Success:' || V_TASKS;
+ IF V_ERRORS > 0 THEN
+  P_RETURN_VALUE := P_RETURN_VALUE
+                    || ' Failed:'
+                    || V_ERRORS;
+ END IF;
+END;
