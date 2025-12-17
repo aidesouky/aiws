@@ -1,3 +1,6 @@
+##note 
+##do not add certificates with wildcard like this *.name.com
+##add root ca and intermediate ca only
 -- To create a wallet
 # orapki wallet create -wallet <wallet_path> -pwd <password>
 
