@@ -46,7 +46,7 @@ BEGIN
                                              (UTL_ENCODE.BASE64_ENCODE
                                              (UTL_RAW.CAST_TO_RAW('USER:PASS'
                                              ))));
- UTL_HTTP.SET_HEADER(V_REQ, 'User-agent', 'mozilla/4.0');
+-- UTL_HTTP.SET_HEADER(V_REQ, 'User-agent', 'mozilla/4.0');
  UTL_HTTP.SET_HEADER(V_REQ, 'Content-type', 'text/xml');
  UTL_HTTP.SET_HEADER(V_REQ, 'Accept-Charset', 'utf-8');
  UTL_HTTP.SET_HEADER(V_REQ, 'Content-Length', V_CONTENT_LENGTH);
