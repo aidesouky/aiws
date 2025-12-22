@@ -83,10 +83,10 @@ Requests and Certificates
 8.create privatekey and certificate with config file in one shot (config file in the end of this file)
 # openssl req -x509 -new -keyout privatekey.key -out certificate.crt -config config.txt
 
-9.create privatekey and certificate in one shot
+9.create privatekey and CA certificate in one shot
 # openssl req -x509 -sha256 -days 3650 -new -newkey rsa:4096 -keyout privatekey.key -out certificate.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
 
-10.create privatekey and certificate without pass phrase in one shot
+10.create privatekey and CA certificate without pass phrase in one shot
 # openssl req -x509 -sha256 -days 3650 -new -nodes -newkey rsa:4096 -keyout privatekey.key -out certificate.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
 
 11.create certificate from privatekey in one shot
