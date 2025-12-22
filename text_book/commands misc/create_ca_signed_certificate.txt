@@ -5,7 +5,7 @@
 # openssl rsa -pubout -in privatekey.key -out publickey.key
 
 3.create request from private key in one shot
-# openssl req -new -sha256 -key privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
+# openssl req -new -sha256 -key privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@ai.twin.local/CN=ai.twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
 
 4.create CA privatekey and CA certificate in one shot
 # openssl req -x509 -sha256 -days 3650 -new -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"

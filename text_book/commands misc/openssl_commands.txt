@@ -60,22 +60,22 @@ Requests and Certificates
 ==================================================
 
 1.create private key without pass phrase and certificate in one shot
-# openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:4096 -keyout privatekey.key -out certificate.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local"
+# openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:4096 -keyout privatekey.key -out certificate.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=ai.twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local"
 
 2.create request from existing certificate
 # openssl x509 -x509toreq -in certificate.crt -signkey privatekey.key -out request.csr
 
 3.create request from private key in one shot
-# openssl req -new -sha256 -key privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
+# openssl req -new -sha256 -key privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=ai.twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
 
 4.create privatekey and request with config file in one shot (config file in the end of this file)
 # openssl req -new -keyout privatekey.key -out request.csr -config config.txt
 
 5.create privatekey and request in one shot
-# openssl req -new -newkey rsa:2048 -keyout privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
+# openssl req -new -newkey rsa:2048 -keyout privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=ai.twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
 
 6.create privatekey and request without pass phrase in one shot
-# openssl req -new -newkey rsa:2048 -nodes -keyout privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
+# openssl req -new -newkey rsa:2048 -nodes -keyout privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=ai.twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
 
 7.create certificate from privatekey and request
 # openssl x509 -req -sha256 -days 3650 -in request.csr -signkey privatekey.key -out certificate.crt
@@ -83,14 +83,14 @@ Requests and Certificates
 8.create privatekey and certificate with config file in one shot (config file in the end of this file)
 # openssl req -x509 -new -keyout privatekey.key -out certificate.crt -config config.txt
 
-9.create privatekey and CA certificate in one shot
-# openssl req -x509 -sha256 -days 3650 -new -newkey rsa:4096 -keyout privatekey.key -out certificate.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
+9.create CA privatekey and CA certificate in one shot
+# openssl req -x509 -sha256 -days 3650 -new -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
 
-10.create privatekey and CA certificate without pass phrase in one shot
-# openssl req -x509 -sha256 -days 3650 -new -nodes -newkey rsa:4096 -keyout privatekey.key -out certificate.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
+10.create CA privatekey and CA certificate without pass phrase in one shot
+# openssl req -x509 -sha256 -days 3650 -new -nodes -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
 
-11.create certificate from privatekey in one shot
-# openssl req -x509 -sha256 -days 3650 -new -key privatekey.key -out certificate.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
+11.create CA certificate from CA privatekey in one shot
+# openssl req -x509 -sha256 -days 3650 -new -key cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
 
 12.create certificate from request using CA certificate and CA private key (issued by CA) (san file in the end of this file)
 # openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -set_serial 1001 -in request.csr -out certificate.crt -extfile san.txt
