@@ -1,0 +1,154 @@
+==================================================================
+Create ca, intermediate ca and sign new entity certificate steps
+==================================================================
+
+Note: 
+ mkdir rootca intermediateca server
+ cd rootca
+ touch index.txt index.txt.attr serial crlnumber 
+ # cp root.cnf .
+ echo 1000 > serial
+ echo 1000 > crlnumber
+ cd intermediateca
+ touch  index.txt index.txt.attr serial crlnumber 
+ # cp intermediate.cnf .
+ echo 1001 > serial
+ echo 1000 > crlnumber
+ cd server
+ # cp server.cnf .
+
+1.create privatekey
+# openssl genrsa -aes256 -out rootca/rootca.key 2048
+
+2.create root certificate and privatekey using configuration file
+# openssl req -new -x509 -config rootca/rootca.cnf -keyout rootca/rootca.key -out rootca/rootca.crt
+
+3.create intermediate request and privatekey using configuration file
+# openssl req -new -config intermediateca/intermediateca.cnf -keyout intermediateca/intermediateca.key -out intermediateca/intermediateca.csr
+
+4.create intermediate certificate from request using configuration file
+# openssl ca -notext -days 3650 -md sha256 -config intermediateca/intermediateca.cnf -extensions v3_intermediate_ca -in intermediateca/intermediateca.csr -out intermediateca/intermediateca.crt
+
+5.create server request and privatekey using configuration file
+# openssl req -new -config server/server.cnf -keyout server/server.key -out server/server.csr
+
+6.create server certificate from request using configuration file
+# openssl ca -notext -days 3650 -md sha256 -config intermediateca/intermediateca.cnf -extensions server_cert -in server/server.csr -out server/server.crt
+
+7.create server request and privatekey
+# openssl req -new -newkey rsa:2048 -keyout server/server.key -out server/server.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/"
+
+8.create server certificate from request
+# openssl x509 -req -days 3650 -CA intermediateca/intermediateca.crt -CAkey intermediateca/intermediateca.key -in server/server.csr -out server/server.crt -extfile san.txt
+
+======================================================================
+======================================================================
+--------intermediatesan.txt------------
+basicConstraints=critical,CA:TRUE,pathlen:0
+authorityKeyIdentifier=keyid,issuer
+subjectKeyIdentifier=hash
+#authorityInfoAccess=OCSP;URI:https://twin.local
+#authorityInfoAccess=caIssuers;URI:https://twin.local
+#keyUsage=critical,keyCertSign,cRLSign
+subjectAltName = @alt_names 
+
+[alt_names] 
+DNS.1 = twin.local
+DNS.2 = ai.twin.local
+DNS.3 = mi.twin.local
+DNS.4 = *.twin.local
+IP.1	= 192.168.1.101
+IP.2	= 192.168.1.102
+IP.3	= 192.168.1.103
+IP.4	= 192.168.1.104
+IP.5	= 192.168.1.105
+IP.6	= 192.168.1.106
+IP.7	= 192.168.1.107
+IP.8	= 192.168.1.108
+IP.9	= 192.168.1.109
+----------------------------
+--------san.txt------------
+basicConstraints=CA:false
+authorityKeyIdentifier=keyid,issuer 
+subjectKeyIdentifier=hash
+#authorityInfoAccess=OCSP;URI:https://twin.local
+#authorityInfoAccess=caIssuers;URI:https://twin.local
+#keyUsage=digitalSignature, keyEncipherment
+#extendedKeyUsage=codesigning
+subjectAltName = @alt_names 
+
+[alt_names] 
+DNS.1 = twin.local
+DNS.2 = ai.twin.local
+DNS.3 = mi.twin.local
+DNS.4 = *.twin.local
+IP.1	= 192.168.1.101
+IP.2	= 192.168.1.102
+IP.3	= 192.168.1.103
+IP.4	= 192.168.1.104
+IP.5	= 192.168.1.105
+IP.6	= 192.168.1.106
+IP.7	= 192.168.1.107
+IP.8	= 192.168.1.108
+IP.9	= 192.168.1.109
+----------------------------
+
+--------server config.txt------------
+[ req ]
+default_bits       = 2048
+default_md          = sha256
+default_days      = 3650
+distinguished_name = req_distinguished_name
+# when using -x509 flag
+x509_extensions     = x509_ext
+string_mask         = utf8only
+#prompt              = no
+#encrypt_key         = no
+
+[ req_distinguished_name ]
+commonName                      = Common Name
+countryName                     = Country Name (2 letter code)
+stateOrProvinceName             = State or Province Name
+localityName                    = Locality Name
+0.organizationName              = Organization Name
+organizationalUnitName          = Organizational Unit Name
+emailAddress                    = Email Address
+
+# Optionally, specify some defaults.
+commonName_default              = twin.local
+countryName_default             = EG
+stateOrProvinceName_default     = DK
+localityName_default            = DK
+0.organizationName_default      = twin
+organizationalUnitName_default  = ai
+emailAddress_default            = contact@twin.local
+
+[ x509_ext ]
+basicConstraints=CA:false
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer 
+#authorityInfoAccess=OCSP;URI:https://twin.local
+#authorityInfoAccess=caIssuers;URI:https://twin.local
+#keyUsage=digitalSignature, keyEncipherment
+#extendedKeyUsage=codesigning
+subjectAltName = @alt_names
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1	= twin.local
+DNS.2	= ai.twin.local
+DNS.3	= mi.twin.local
+DNS.4	= *.twin.local
+DNS.5	= localhost
+IP.1	= 192.168.1.101
+IP.2	= 192.168.1.102
+IP.3	= 192.168.1.103
+IP.4	= 192.168.1.104
+IP.5	= 192.168.1.105
+IP.6	= 192.168.1.106
+IP.7	= 192.168.1.107
+IP.8	= 192.168.1.108
+IP.9	= 192.168.1.109
+----------------------------

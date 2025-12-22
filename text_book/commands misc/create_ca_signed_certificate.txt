@@ -13,6 +13,33 @@
 5.create certificate from request using CA certificate and CA private key (issued by CA) (san file in the end of this file)
 # openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -CAcreateserial -in request.csr -out certificate.crt -extfile san.txt
 
+6.create intermediate ca certificate from request using CA certificate and CA private key (issued by CA) (intermediatesan file in the end of this file)
+# openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -CAcreateserial -in request.csr -out certificate.crt -extfile intermediatesan.txt
+
+--------intermediatesan.txt------------
+basicConstraints=critical,CA:TRUE,pathlen:0
+authorityKeyIdentifier=keyid,issuer
+subjectKeyIdentifier=hash
+#authorityInfoAccess=OCSP;URI:https://twin.local
+#authorityInfoAccess=caIssuers;URI:https://twin.local
+#keyUsage=critical,keyCertSign,cRLSign
+subjectAltName = @alt_names 
+
+[alt_names] 
+DNS.1 = twin.local
+DNS.2 = ai.twin.local
+DNS.3 = mi.twin.local
+DNS.4 = *.twin.local
+IP.1	= 192.168.1.101
+IP.2	= 192.168.1.102
+IP.3	= 192.168.1.103
+IP.4	= 192.168.1.104
+IP.5	= 192.168.1.105
+IP.6	= 192.168.1.106
+IP.7	= 192.168.1.107
+IP.8	= 192.168.1.108
+IP.9	= 192.168.1.109
+
 --------san.txt------------
 basicConstraints=CA:false
 authorityKeyIdentifier=keyid,issuer 

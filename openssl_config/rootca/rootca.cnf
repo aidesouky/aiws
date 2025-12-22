@@ -7,7 +7,7 @@ default_ca = CA_default
 
 [ CA_default ]
 # Directory and file locations.
-dir               = C:/Users/AI/Documents/Newfolder/openssl/rootca
+dir               = ./rootca
 certs             = $dir/
 crl_dir           = $dir/
 new_certs_dir     = $dir/
@@ -20,7 +20,7 @@ certificate       = $dir/rootca.crt
 # For certificate revocation lists.
 default_crl_days  = 30
 crlnumber         = $dir/crlnumber
-crl               = $dir/ca.asys.crl
+crl               = $dir/ca.twin.crl
 crl_extensions    = crl_ext
 name_opt          = ca_default
 cert_opt          = ca_default
@@ -74,13 +74,13 @@ localityName                    = Locality Name
 organizationalUnitName          = Organizational Unit Name
 emailAddress                    = Email Address
 # Optionally, specify some defaults.
-commonName_default              = asys.local
+commonName_default              = twin.local
 countryName_default             = EG
 stateOrProvinceName_default     = DK
 localityName_default            = DK
-0.organizationName_default      = asys
+0.organizationName_default      = twin
 organizationalUnitName_default  = ai
-emailAddress_default            = contact@asys.local
+emailAddress_default            = contact@twin.local
 
 [ v3_ca ]
 # Extensions for a typical CA ('man x509v3_config').
@@ -128,5 +128,12 @@ DNS.2	= ai.twin.local
 DNS.3	= mi.twin.local
 DNS.4	= *.twin.local
 DNS.5	= localhost
-IP.1	= 192.168.1.100
-IP.2	= 192.168.1.101
+IP.1	= 192.168.1.101
+IP.2	= 192.168.1.102
+IP.3	= 192.168.1.103
+IP.4	= 192.168.1.104
+IP.5	= 192.168.1.105
+IP.6	= 192.168.1.106
+IP.7	= 192.168.1.107
+IP.8	= 192.168.1.108
+IP.9	= 192.168.1.109

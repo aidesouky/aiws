@@ -20,20 +20,20 @@ localityName                    = Locality Name
 organizationalUnitName          = Organizational Unit Name
 emailAddress                    = Email Address
 # Optionally, specify some defaults.
-commonName_default              = asys.local
+commonName_default              = server.ai.twin.local
 countryName_default             = EG
 stateOrProvinceName_default     = DK
 localityName_default            = DK
-0.organizationName_default      = asys
+0.organizationName_default      = twin
 organizationalUnitName_default  = ai
-emailAddress_default            = contact@asys.local
+emailAddress_default            = contact@twin.local
 
 [ x509_ext ]
 basicConstraints=CA:false
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid,issuer 
-#authorityInfoAccess=OCSP;URI:https://asys.local
-#authorityInfoAccess=caIssuers;URI:https://asys.local
+#authorityInfoAccess=OCSP;URI:https://twin.local
+#authorityInfoAccess=caIssuers;URI:https://twin.local
 #keyUsage=digitalSignature, keyEncipherment
 #extendedKeyUsage=serverAuth, clientAuth, emailProtection, codesigning
 subjectAltName = @alt_names
