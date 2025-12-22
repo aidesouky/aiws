@@ -84,21 +84,22 @@ Requests and Certificates
 # openssl req -x509 -new -keyout privatekey.key -out certificate.crt -config config.txt
 
 9.create CA privatekey and CA certificate in one shot
-# openssl req -x509 -sha256 -days 3650 -new -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true" -addext "keyUsage=critical,keyCertSign,cRLSign"
+# openssl req -x509 -sha256 -days 3650 -new -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=Twin RootCA/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true" -addext "keyUsage=critical,keyCertSign,cRLSign" -addext "subjectKeyIdentifier=hash"
 
 10.create CA privatekey and CA certificate without pass phrase in one shot
-# openssl req -x509 -sha256 -days 3650 -new -nodes -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true" -addext "keyUsage=critical,keyCertSign,cRLSign"
+# openssl req -x509 -sha256 -days 3650 -new -nodes -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=Twin RootCA/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true" -addext "keyUsage=critical,keyCertSign,cRLSign" -addext "subjectKeyIdentifier=hash"
 
 11.create CA certificate from CA privatekey in one shot
-# openssl req -x509 -sha256 -days 3650 -new -key cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true" -addext "keyUsage=critical,keyCertSign,cRLSign"
+# openssl req -x509 -sha256 -days 3650 -new -key cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=Twin RootCA/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true" -addext "keyUsage=critical,keyCertSign,cRLSign" -addext "subjectKeyIdentifier=hash"
 
-12.create signed certificate from request using CA certificate and CA private key (issued by CA) (san file in the end of this file)
+12.create intermediate ca certificate from request using CA certificate and CA private key (issued by CA) (intermediatesan file in the end of this file)
+# openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -set_serial 1001 -in request.csr -out certificate.crt -extfile intermediatesan.txt
+# openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -CAcreateserial -in request.csr -out certificate.crt -extfile intermediatesan.txt
+
+13.create signed certificate from request using CA certificate and CA private key (issued by CA) (san file in the end of this file)
 # openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -set_serial 1001 -in request.csr -out certificate.crt -extfile san.txt
 # openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -CAcreateserial -in request.csr -out certificate.crt -extfile san.txt
 
-13.create intermediate ca certificate from request using CA certificate and CA private key (issued by CA) (intermediatesan file in the end of this file)
-# openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -set_serial 1001 -in request.csr -out certificate.crt -extfile intermediatesan.txt
-# openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -CAcreateserial -in request.csr -out certificate.crt -extfile intermediatesan.txt
 ====================================================
 Keystores
 ====================================================
@@ -317,7 +318,7 @@ Note:
 --------intermediatesan.txt------------
 basicConstraints=critical,CA:TRUE,pathlen:0
 authorityKeyIdentifier=keyid,issuer
-subjectKeyIdentifier=hash
+#subjectKeyIdentifier=hash
 keyUsage=critical,keyCertSign,cRLSign
 #authorityInfoAccess=OCSP;URI:https://twin.local
 #authorityInfoAccess=caIssuers;URI:https://twin.local
@@ -342,7 +343,7 @@ IP.9	= 192.168.1.109
 basicConstraints=CA:false
 authorityKeyIdentifier=keyid,issuer 
 keyUsage=digitalSignature, keyEncipherment
-#extendedKeyUsage=codesigning
+extendedKeyUsage=serverAuth
 #authorityInfoAccess=OCSP;URI:https://twin.local
 #authorityInfoAccess=caIssuers;URI:https://twin.local
 subjectAltName = @alt_names 
