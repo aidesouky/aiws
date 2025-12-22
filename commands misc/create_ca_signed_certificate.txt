@@ -11,7 +11,7 @@
 # openssl req -new -newkey rsa:2048 -keyout privatekey.key -out request.csr -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=ai.twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100"
 
 5.create CA privatekey and CA certificate in one shot
-# openssl req -x509 -sha256 -days 3650 -new -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true"
+# openssl req -x509 -sha256 -days 3650 -new -newkey rsa:4096 -keyout cakey.key -out cacert.crt -subj "/C=EG/O=twin/OU=ai/L=CA/ST=CA/emailAddress=admin@twin.local/CN=twin.local/" -addext "subjectAltName=DNS:twin.local,DNS:*.twin.local,IP:192.1.1.100" -addext "basicConstraints=critical, CA:true" -addext "keyUsage=critical,keyCertSign,cRLSign"
 
 6.create certificate from request using CA certificate and CA private key (issued by CA) (san file in the end of this file)
 # openssl x509 -req -days 3650 -CA cacert.crt -CAkey cakey.key -CAcreateserial -in request.csr -out certificate.crt -extfile san.txt
@@ -23,9 +23,9 @@
 basicConstraints=critical,CA:TRUE,pathlen:0
 authorityKeyIdentifier=keyid,issuer
 subjectKeyIdentifier=hash
+keyUsage=critical,keyCertSign,cRLSign
 #authorityInfoAccess=OCSP;URI:https://twin.local
 #authorityInfoAccess=caIssuers;URI:https://twin.local
-#keyUsage=critical,keyCertSign,cRLSign
 subjectAltName = @alt_names 
 
 [alt_names] 
@@ -46,10 +46,10 @@ IP.9	= 192.168.1.109
 --------san.txt------------
 basicConstraints=CA:false
 authorityKeyIdentifier=keyid,issuer 
+keyUsage=digitalSignature, keyEncipherment
+#extendedKeyUsage=codesigning
 #authorityInfoAccess=OCSP;URI:https://twin.local
 #authorityInfoAccess=caIssuers;URI:https://twin.local
-#keyUsage=digitalSignature, keyEncipherment
-#extendedKeyUsage=codesigning
 subjectAltName = @alt_names 
 
 [alt_names] 
