@@ -1,0 +1,420 @@
+Apache Commons Libraries – Description and Functions
+Apache Commons is a collection of reusable Java libraries that simplifies common programming tasks. Each library provides specific functionality and can be added independently to your Java project.
+============================================
+A. Core utility libraries
+============================================
+1.Commons Lang	
+Extends standard Java classes	
+StringUtils, DateUtils, NumberUtils, ObjectUtils
+============================================
+// StringUtils
+StringUtils.isBlank(" ");             // true
+StringUtils.defaultString(null);      // ""
+StringUtils.isNumeric("123");         // true
+StringUtils.capitalize("hello");      // Hello
+StringUtils.reverse("hello");         // olleh
+// ObjectUtils
+ObjectUtils.defaultIfNull(null, "N/A"); // N/A
+ObjectUtils.isEmpty("");               // true
+// NumberUtils
+NumberUtils.toInt("123");              // 123
+NumberUtils.isCreatable("12.5");       // true
+NumberUtils.max(10, 20, 30);           // 30
+============================================
+2.Commons IO
+Simplifies file and stream operations
+FileUtils, IOUtils, FilenameUtils
+============================================
+// FileUtils
+FileUtils.copyFile(source, target);
+FileUtils.deleteQuietly(file);
+FileUtils.forceMkdir(directory);
+FileUtils.sizeOf(file);
+FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+FileUtils.writeStringToFile(file, "Hello", StandardCharsets.UTF_8);
+// IOUtils
+String data = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+IOUtils.copy(inputStream, outputStream);
+IOUtils.closeQuietly(inputStream);
+// FilenameUtils
+FilenameUtils.getExtension("invoice.pdf"); // pdf
+FilenameUtils.getName("/files/invoice.pdf"); // invoice.pdf
+FilenameUtils.getBaseName("invoice.pdf"); // invoice
+============================================
+3.Commons Collections
+Additional collection data structures
+MultiValuedMap, Bag, BidiMap
+============================================
+// MultiValuedMap
+MultiValuedMap<String, String> map = new ArrayListValuedHashMap<>();
+map.put("IT", "Ahmed");
+map.put("IT", "Yusuf");
+Collection<String> employees = map.get("IT");
+// BidiMap
+BidiMap<String, Integer> bidi = new DualHashBidiMap<>();
+bidi.put("Ahmed", 100);
+bidi.getKey(100); // Ahmed
+// Bag
+Bag<String> bag = new HashBag<>();
+bag.add("Java", 3);
+bag.getCount("Java"); // 3
+============================================
+4.Commons Text
+Advanced text processing
+String escaping, similarity, interpolation
+============================================
+StringEscapeUtils.escapeHtml4("<h1>Hello</h1>");
+// &lt;h1&gt;Hello&lt;/h1&gt;
+StringEscapeUtils.escapeJson("Hello \"Java\"");
+StringUtils.getLevenshteinDistance("Java", "Jaba");
+// 1
+StringSubstitutor sub = new StringSubstitutor(
+    Map.of("name", "Ahmed")
+);
+sub.replace("Hello ${name}"); // Hello Ahmed
+============================================
+5.Commons Codec
+Encoding and decoding
+Base64, Hex, URL encoding, Digest
+============================================
+// Base64
+String encoded = Base64.encodeBase64String(
+    "Hello".getBytes(StandardCharsets.UTF_8)
+);
+// Hex
+String hex = Hex.encodeHexString(new byte[]{10, 20});
+// Digest
+String sha256 = DigestUtils.sha256Hex("Hello");
+// URL encoding
+String url = URLCodec.encodeUrl(null, "Hello World".getBytes());
+============================================
+6.Commons Numbers
+Advanced number types
+Fractions, complex numbers, quaternions
+============================================
+// Fraction
+Fraction f = Fraction.getFraction(3, 4);
+f.add(Fraction.ONE);       // 7/4
+f.doubleValue();           // 0.75
+// Complex numbers
+Complex c = new Complex(3, 4);
+c.abs();                   // 5.0
+c.getArgument();
+============================================
+B. File and data processing
+============================================
+1.Commons CSV
+CSV file processing
+CSVParser, CSVPrinter
+============================================
+// Read CSV
+try (CSVParser parser = CSVParser.parse(
+        file, StandardCharsets.UTF_8, CSVFormat.DEFAULT)) {
+    for (CSVRecord r : parser) {
+        System.out.println(r.get(0));
+    }
+}
+// Write CSV
+try (CSVPrinter printer = new CSVPrinter(
+        writer, CSVFormat.DEFAULT)) {
+    printer.printRecord("ID", "Name");
+    printer.printRecord(1, "Ahmed");
+}
+============================================
+2.Commons Compress
+Archive file processing
+ZIP, TAR, GZIP, BZIP2
+============================================
+// ZIP
+try (ZipArchiveOutputStream zip =
+        new ZipArchiveOutputStream(new File("data.zip"))) {
+    zip.putArchiveEntry(new ZipArchiveEntry("hello.txt"));
+    zip.write("Hello".getBytes(StandardCharsets.UTF_8));
+    zip.closeArchiveEntry();
+}
+// GZIP
+try (GZIPOutputStream gzip =
+        new GZIPOutputStream(new FileOutputStream("data.gz"))) {
+    gzip.write("Hello".getBytes(StandardCharsets.UTF_8));
+}
+============================================
+3.Commons FileUpload
+============================================
+HTTP file uploads
+Multipart request processing
+============================================
+DiskFileItemFactory factory = new DiskFileItemFactory();
+JakartaServletFileUpload upload =
+        new JakartaServletFileUpload(factory);
+List<FileItem> items = upload.parseRequest(request);
+for (FileItem item : items) {
+    if (!item.isFormField()) {
+        item.write(new File("/uploads/" + item.getName()));
+    }
+}
+============================================
+4.Commons Imaging
+Image processing
+Read/write image formats, metadata
+============================================
+// Read image dimensions
+ImageInfo info = Imaging.getImageInfo(file);
+System.out.println(info.getWidth());
+System.out.println(info.getHeight());
+// Read metadata
+ImageMetadata metadata = Imaging.getMetadata(file);
+============================================
+5.Commons VFS
+Unified file system access
+Local files, FTP, SFTP, ZIP
+============================================
+FileSystemManager fs = VFS.getManager();
+FileObject source = fs.resolveFile("file:///data/a.txt");
+FileObject target = fs.resolveFile("file:///backup/a.txt");
+target.copyFrom(source, Selectors.SELECT_ALL);
+source.close();
+target.close();
+============================================
+6.Commons Configuration
+Configuration management
+Properties, XML, INI, configuration files
+============================================
+PropertiesConfiguration config =
+        new PropertiesConfiguration("app.properties");
+String db = config.getString("database.url");
+int port = config.getInt("server.port", 8080);
+config.setProperty("server.port", 9090);
+config.save();
+============================================
+C. Database and connection management
+============================================
+1.Commons DBCP
+Database connection pooling
+BasicDataSource
+============================================
+BasicDataSource ds = new BasicDataSource();
+ds.setDriverClassName("oracle.jdbc.OracleDriver");
+ds.setUrl("jdbc:oracle:thin:@//localhost:1521/ORCL");
+ds.setUsername("ETAC_APP");
+ds.setPassword("password");
+ds.setMaxTotal(20);
+try (Connection con = ds.getConnection()) {
+    System.out.println(con.isValid(5));
+}
+============================================
+2.Commons Pool
+Object pooling
+GenericObjectPool
+============================================
+GenericObjectPool<StringBuilder> pool =
+    new GenericObjectPool<>(new BasePooledObjectFactory<StringBuilder>() {
+        public StringBuilder create() {
+            return new StringBuilder();
+        }
+
+        public PooledObject<StringBuilder> wrap(StringBuilder obj) {
+            return new DefaultPooledObject<>(obj);
+        }
+    });
+StringBuilder obj = pool.borrowObject();
+obj.append("Hello");
+pool.returnObject(obj);
+============================================
+3.Commons DbUtils
+Simplifies JDBC operations
+QueryRunner, ResultSetHandler
+============================================
+QueryRunner runner = new QueryRunner(dataSource);
+// SELECT
+String name = runner.query(
+    "SELECT NAME FROM EMPLOYEES WHERE ID = ?",
+    new ScalarHandler<String>(), 100
+);
+// INSERT / UPDATE / DELETE
+int rows = runner.update(
+    "UPDATE EMPLOYEES SET NAME=? WHERE ID=?",
+    "Ahmed", 100
+);
+============================================
+D. Web and networking
+============================================
+1.Commons Net
+Network protocol implementation
+FTP, SMTP, POP3, Telnet
+============================================
+// FTP
+FTPClient ftp = new FTPClient();
+ftp.connect("192.168.1.100");
+ftp.login("user", "password");
+ftp.enterLocalPassiveMode();
+ftp.setFileType(FTP.BINARY_FILE_TYPE);
+try (InputStream in = new FileInputStream("invoice.pdf")) {
+    ftp.storeFile("invoice.pdf", in);
+}
+ftp.logout();
+ftp.disconnect();
+============================================
+2.Commons Email
+Simplifies email sending
+SimpleEmail, HtmlEmail
+============================================
+Email email = new SimpleEmail();
+email.setHostName("smtp.office365.com");
+email.setSmtpPort(587);
+email.setAuthentication("user", "password");
+email.setStartTLSEnabled(true);
+email.setFrom("sender@company.com");
+email.addTo("receiver@company.com");
+email.setSubject("Invoice");
+email.setMsg("Invoice submitted successfully");
+email.send();
+============================================
+3.Commons Exec
+Executes external processes
+CommandLine, DefaultExecutor
+============================================
+CommandLine cmd = new CommandLine("ping");
+cmd.addArgument("127.0.0.1");
+DefaultExecutor executor = new DefaultExecutor();
+int result = executor.execute(cmd);
+System.out.println(result);
+============================================
+4.Commons CLI
+Command-line argument processing
+Options, CommandLineParser
+============================================
+Options options = new Options();
+options.addOption("u", "username", true, "Username");
+CommandLineParser parser = new DefaultParser();
+CommandLine cmd = parser.parse(options, args);
+String username = cmd.getOptionValue("u");
+============================================
+5.Commons Logging
+Logging abstraction
+LogFactory, Log
+============================================
+Log log = LogFactory.getLog(MyClass.class);
+log.info("Application started");
+log.warn("Warning message");
+log.error("Database error");
+log.debug("Debug information");
+============================================
+E. Java development and object manipulation
+============================================
+1.Commons BeanUtils
+JavaBean manipulation
+Copy properties, convert types
+============================================
+// Copy properties
+BeanUtils.copyProperties(target, source);
+// Set property
+BeanUtils.setProperty(bean, "name", "Ahmed");
+// Get property
+String name = BeanUtils.getProperty(bean, "name");
+// Copy same-name properties
+PropertyUtils.copyProperties(target, source);
+============================================
+2.Commons Validator
+Data validation
+Email, URL, numeric validation
+============================================
+EmailValidator.getInstance().isValid("a@test.com");
+UrlValidator.getInstance().isValid("https://google.com");
+GenericValidator.isInt("123");
+GenericValidator.isDate("24/11/2026", "dd/MM/yyyy", true);
+============================================
+3.Commons JEXL
+Expression language
+Evaluate dynamic expressions
+============================================
+JexlEngine engine = new JexlBuilder().create();
+JexlExpression expression =
+    engine.createExpression("price * quantity");
+JexlContext context = new MapContext();
+context.set("price", 100);
+context.set("quantity", 5);
+Object result = expression.evaluate(context);
+// 500
+============================================
+4.Commons JXPath
+XPath for Java objects
+Navigate JavaBean structures
+============================================
+Object name = JXPathContext.newContext(employee)
+    .getValue("name");
+Object city = JXPathContext.newContext(employee)
+    .getValue("address/city");
+============================================
+5.Commons Digester
+XML-to-Java mapping
+Parse XML into Java objects
+============================================
+Digester digester = new Digester();
+digester.addObjectCreate("employee", Employee.class);
+digester.addBeanPropertySetter("employee/name", "name");
+digester.addBeanPropertySetter("employee/age", "age");
+Employee emp = digester.parse(inputStream);
+============================================
+6.Commons BCEL
+Java bytecode manipulation
+Analyze and modify class files
+============================================
+JavaClass clazz =
+    new ClassParser("MyClass.class").parse();
+System.out.println(clazz.getClassName());
+for (Method method : clazz.getMethods()) {
+    System.out.println(method.getName());
+}
+============================================
+F. Mathematical and statistical libraries
+============================================
+1.Commons Math
+Mathematical algorithms
+Statistics, optimization, geometry
+============================================
+// Mean
+double[] values = {10, 20, 30, 40};
+DescriptiveStatistics stats = new DescriptiveStatistics(values);
+stats.getMean();       // 25
+stats.getStandardDeviation();
+// Random number
+double random = new RandomDataGenerator()
+    .nextUniform(1, 100);
+// Geometry
+Vector2D p1 = new Vector2D(0, 0);
+Vector2D p2 = new Vector2D(3, 4);
+p1.distance(p2);       // 5
+============================================
+2.Commons Statistics
+Statistical calculations
+Distributions, descriptive statistics
+============================================
+// Normal distribution
+NormalDistribution normal =
+    NormalDistribution.of(0, 1);
+double probability = normal.cumulativeProbability(1.96);
+// Descriptive statistics
+double mean = IntStatistics.of(10, 20, 30).getMean();
+============================================
+3.Commons RNG
+Random number generation
+Random generators and sampling
+============================================
+UniformRandomProvider rng =
+    RandomSource.XO_SHI_RO_256_PP.create();
+int number = rng.nextInt(1, 101);
+double decimal = rng.nextDouble();
+============================================
+4.Commons Geometry
+Geometrical calculations
+2D and 3D geometry
+============================================
+Vector2D p1 = Vector2D.of(1, 2);
+Vector2D p2 = Vector2D.of(4, 6);
+// Distance
+double distance = p1.distance(p2);
+// Vector addition
+Vector2D sum = p1.add(p2);
+// Dot product
+double dot = p1.dot(p2);
+============================================
